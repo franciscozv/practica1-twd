@@ -1,26 +1,37 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import axios from 'axios'
 import { CircularProgress, Container, Grid, Typography, Card, CardMedia, CardContent, CardActions, Tooltip, IconButton} from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BlockIcon from '@mui/icons-material/Block';
 import CardPerrito from './CardPerrito';
 import { useQuery } from 'react-query'
+import { LoremIpsum } from "lorem-ipsum";
 const AppRefac = () => {
-
+    const lorem = new LoremIpsum({
+        sentencesPerParagraph: {
+          max: 8,
+          min: 4
+        },
+        wordsPerSentence: {
+          max: 16,
+          min: 4
+        }
+      });
     const [perritoRandom, setPerritoRandom] = useState({})
     const[listaPerritos, setListaPerritos] = useState([])
 
     const getData = async () => {
-            await axios.get('https://dog.ceo/api/breeds/image/random')
-            .then(res =>
-                setPerritoRandom({
+        await axios.get('https://dog.ceo/api/breeds/image/random')
+        .then(res =>
+            setPerritoRandom({
                 id: `${Date.now()}`,
                 name: nombreAleatorio(),
                 img: res.data.message,
-                description: 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ullam, esse.',
+                description: lorem.generateSentences(1),
                 aceptado: null,
                 showDescription: false
-            }))
+            })
+        )
     }
     const handleAddPerrito = (e) => {
         const { name } = e.currentTarget;
