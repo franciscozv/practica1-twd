@@ -5,12 +5,18 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { CssBaseline } from '@mui/material';
-import AppRefac from './AppRefac';
+import { QueryClient, QueryClientProvider } from 'react-query'
+import AppRefac from './AppRefac'
+
+const queryClient = new QueryClient()
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
   <>
-  <CssBaseline/>
-  <AppRefac/>
+    <QueryClientProvider client={ queryClient }>
+      <CssBaseline/>
+        <AppRefac/>
+    </QueryClientProvider>
   </>
   // </React.StrictMode>,
 )
