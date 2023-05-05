@@ -4,9 +4,32 @@ import { CircularProgress, Container, Grid, Typography, Card, CardMedia, CardCon
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BlockIcon from '@mui/icons-material/Block';
 import CardPerrito from './CardPerrito';
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { LoremIpsum } from "lorem-ipsum";
 const AppRefac = () => {
+    const getPerrito = async () => {
+        await axios.get('https://dog.ceo/api/breeds/image/random')
+        .then(res =>
+            setPerritoRandom({
+                id: `${Date.now()}`,
+                name: nombreAleatorio(),
+                img: res.data.message,
+                description: lorem.generateSentences(1),
+                aceptado: null,
+                showDescription: false
+            })
+        )
+    }
+    const query = useQuery(
+        ['randomPerrito'],
+        getPerrito, {
+            retry: 0,
+            refetchOnWindowFocus: false,
+            refetchOnMount: false,
+            keepPreviousData: false,
+            enabled: true,
+          }
+    )
     const lorem = new LoremIpsum({
         sentencesPerParagraph: {
           max: 8,
@@ -20,19 +43,6 @@ const AppRefac = () => {
     const [perritoRandom, setPerritoRandom] = useState({})
     const[listaPerritos, setListaPerritos] = useState([])
 
-    const getData = async () => {
-        await axios.get('https://dog.ceo/api/breeds/image/random')
-        .then(res =>
-            setPerritoRandom({
-                id: `${Date.now()}`,
-                name: nombreAleatorio(),
-                img: res.data.message,
-                description: lorem.generateSentences(1),
-                aceptado: null,
-                showDescription: false
-            })
-        )
-    }
     const handleAddPerrito = (e) => {
         const { name } = e.currentTarget;
         setListaPerritos([
@@ -42,7 +52,7 @@ const AppRefac = () => {
             },
             ...listaPerritos
         ])
-        refetch()
+        query.refetch()
     }
     const handleMove = (id) => {
         const newArr = listaPerritos.map(item => {
@@ -75,10 +85,7 @@ const AppRefac = () => {
         setListaPerritos(newArr)
     }
 
-    const { refetch,isFetching } = useQuery({
-        queryKey: ['perrito'],
-        queryFn: getData,
-    })
+
     return (
     <>
         <Container maxWidth='xl' sx={{
@@ -100,9 +107,9 @@ const AppRefac = () => {
                                 alt={ perritoRandom.img }
                             />
                                 <CardContent>
-                                    <Typography variant='h5'>{ isFetching? (<CircularProgress></CircularProgress>):(perritoRandom.name)}</Typography>
+                                    <Typography variant='h5'>{ query.isLoading? (<CircularProgress></CircularProgress>):(perritoRandom.name)}</Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        { !isFetching  && perritoRandom.description}
+                                        { !query.isLoading  && perritoRandom.description}
                                     </Typography>
                                         <CardActions>
                                             <Tooltip title='aceptar'>
@@ -110,7 +117,7 @@ const AppRefac = () => {
                                                 <IconButton
                                                   name='aceptar'
                                                   onClick={(e)=>handleAddPerrito(e)}
-                                                  disabled={isFetching}>
+                                                  disabled={query.isLoading}>
                                                     <FavoriteIcon color='primary'/>
                                                 </IconButton>
                                                 </span>
@@ -119,7 +126,7 @@ const AppRefac = () => {
                                                 <span>
                                                     <IconButton name='rechazar'
                                                     onClick={(e)=>handleAddPerrito(e)}
-                                                    disabled={isFetching}>
+                                                    disabled={query.isLoading}>
                                                         <BlockIcon color='primary'/>
                                                     </IconButton>
 
